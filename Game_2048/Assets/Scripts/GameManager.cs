@@ -4,6 +4,8 @@ using UnityEngine;
 using System.Linq;
 using Random = UnityEngine.Random;
 
+
+[System.Serializable]
 public class GameManager : MonoBehaviour
 {
     
@@ -13,11 +15,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Node nodePrefab;
     [SerializeField] private SpriteRenderer boardPrefab;
     [SerializeField] private Block blockPrifab;
-    [SerializeField] private List<BlockType> types;
+
+    [SerializeField] public List<BlockType> types = new List<BlockType>();
 
 
     private List<Node> nodes = new List<Node>();
     private List<Block> blocks= new List<Block>();
+    private GameState gameState;
 
 
 
@@ -39,6 +43,17 @@ public class GameManager : MonoBehaviour
 
 
     private BlockType getBlockType(int val) => types.First(t => t.value == val);
+
+    private void changeGameState(GameState state){
+        gameState = state;
+
+        switch (state)
+        {
+            
+            default:
+        }
+                    
+    }
 
 
     void generateGrid(){
@@ -65,19 +80,32 @@ public class GameManager : MonoBehaviour
     void getNewBlock(int amount){
 
         var freeNodes = nodes.Where(n => n.currentBlock == null).OrderBy(b=>Random.value).ToList();
+        BlockType blockType = getBlockType(Random.value>0.8 ? 4 : 2);
         foreach (var node in freeNodes.Take(amount))
         {
             var block = Instantiate(blockPrifab,node.pos,Quaternion.identity);
-            block.init(getBlockType(2));
+            block.init(blockType);
+            blocks.Add(block);
         }
+        
     }
 }
 
-[SerializeField]
+[System.Serializable]
 public struct BlockType
 {
     public int value;
     public Color color;
 
     
+}
+
+
+public enum GameState{
+    GenerateLevel,
+    SpawnBlocks,
+    Move,
+    WaitForInput,
+    Win,
+    Loss
 }
